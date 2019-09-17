@@ -21,3 +21,7 @@ def bad_locations(df):
 def snake_to_camel(snake_str):
     components = snake_str.split('_')
     return ''.join(x.title() for x in components)
+
+
+def format_reason(kwargs):
+    return "\nReason: {}".format(kwargs["reason"])

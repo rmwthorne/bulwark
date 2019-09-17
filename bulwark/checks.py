@@ -13,13 +13,13 @@ import numpy as np
 import pandas as pd
 import pandas.util.testing as tm
 
-from bulwark.generic import bad_locations
+from bulwark.generic import bad_locations, format_reason
 
 # Required for DeprecationWarnings to not be ignored
 warnings.simplefilter('always', DeprecationWarning)
 
 
-def has_columns(df, columns, exact_cols=False, exact_order=False, reason=""):
+def has_columns(df, columns, exact_cols=False, exact_order=False, **kwargs):
     """Asserts that `df` has ``columns``
 
     Args:
@@ -61,13 +61,13 @@ def has_columns(df, columns, exact_cols=False, exact_order=False, reason=""):
                 msg.append("`df` column order does not match given `columns` order.")
 
     if msg:
-        msg.append(reason)
+        msg.append(format_reason(kwargs))
         raise AssertionError(" ".join(msg))
 
     return df
 
 
-def has_no_x(df, values=None, columns=None):
+def has_no_x(df, values=None, columns=None, **kwargs):
     """Asserts that there are no user-specified `values` in `df`'s `columns`.
 
     Args:
@@ -81,13 +81,16 @@ def has_no_x(df, values=None, columns=None):
     """
     values = values if values is not None else []
     columns = columns if columns is not None else df.columns
+    msg = []
 
     try:
         assert not df[columns].isin(values).values.any()
     except AssertionError as e:
-        missing = df[columns].isin(values)
-        msg = bad_locations(missing)
-        e.args = msg
+        #  missing = df[columns].isin(values)
+        #  locations_info = ",".join(str(x) for x in bad_locations(missing))
+        #  msg.append(locations_info)
+        #  msg.append(format_reason(kwargs))
+        e.args = " ".join(msg)
         raise
     return df
 
@@ -102,7 +105,7 @@ def none_missing(df, columns=None):
     return has_no_nans(df, columns)
 
 
-def has_no_nans(df, columns=None):
+def has_no_nans(df, columns=None, reason=""):
     """Asserts that there are no np.nans in `df`.
 
     This is a convenience wrapper for `has_no_x`.
@@ -115,7 +118,7 @@ def has_no_nans(df, columns=None):
         Original `df`.
 
     """
-    return has_no_x(df, values=[np.nan], columns=columns)
+    return has_no_x(df, values=[np.nan], columns=columns, reason=reason)
 
 
 def has_no_nones(df, columns=None):

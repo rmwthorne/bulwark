@@ -12,6 +12,7 @@ class BaseDecorator(object):
         self.enabled = True  # setter to enforce bool would be a lot safer
         # self.warn = False ? No - put at func level for all funcs and pass through
         self.params = getfullargspec(self.check_func).args[1:]
+        self.params.append("reason")
 
         self.__dict__.update(dict(zip(self.params, args)))
         self.__dict__.update(**kwargs)

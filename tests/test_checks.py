@@ -512,8 +512,6 @@ def test_multi_check():
                                        total_sum_not_equal: {"amt": 51}},
                                warn=False)(_noop)(df)
 
-    # with pytest.raises(AssertionError):
-
 
 def test_custom_check():
     def f(df, length):
@@ -537,7 +535,17 @@ def test_custom_check():
         dc.CustomCheck(f, 4)(_noop)(df)
 
 
-def test_exception():
-    with pytest.raises(AssertionError, match="message"):
-        df = pd.DataFrame([1, 2, 3], index=["a", "b", "c"], columns=["x"])
-        ck.has_columns(df, columns=["a"], exact_cols=False, exact_order=False, reason="message")
+def test_has_columns_raises_with_reason():
+    with pytest.raises(AssertionError, match="Reason: message"):
+        df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
+        ck.has_columns(df, columns=["x"], exact_cols=False, exact_order=False, reason="message")
+
+
+def test_has_no_nans_raises_with_reason():
+    df = pd.DataFrame(np.random.randn(5, 3))
+    df.iloc[0, 0] = np.nan
+    with pytest.raises(AssertionError, match="Reason: message"):
+        ck.has_no_nans(df, reason="message")
+
+    #  with pytest.raises(AssertionError, match="Reason: message"):
+        #  dc.HasNoNans(reason="message")(_add_n)(df, n=2)
