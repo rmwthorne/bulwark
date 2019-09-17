@@ -34,16 +34,16 @@ def has_columns(df, columns, exact_cols=False, exact_order=False, **kwargs):
 
     """
     df_cols = df.columns
-    msg = []
-
     missing_cols = list(set(columns).difference(df_cols))
-    if missing_cols:
-        msg.append("`df` is missing columns: {}.".format(missing_cols))
+    unexpected_extra_cols = list(set(df_cols).difference(columns)) if exact_cols else None
+    misordered_cols = []
 
-    if exact_cols:
-        unexpected_extra_cols = list(set(df_cols).difference(columns))
-        if unexpected_extra_cols:
-            msg.append("`df` has extra columns: {}.".format(unexpected_extra_cols))
+    msg = " ".join([
+        *(("`df` is missing columns: {}.".format(missing_cols), ) if missing_cols else ()),
+        *(("`df` has unexpected extra columns: {}.".format(unexpected_extra_cols), )
+          if unexpected_extra_cols else ()),
+        format_reason(kwargs) if kwargs.get("reason") else (),
+    ])
 
     if exact_order:
         if missing_cols:
@@ -60,9 +60,8 @@ def has_columns(df, columns, exact_cols=False, exact_order=False, **kwargs):
             if idx_order != sorted(idx_order):
                 msg.append("`df` column order does not match given `columns` order.")
 
-    if msg:
-        msg.append(format_reason(kwargs))
-        raise AssertionError(" ".join(msg))
+    if missing_cols or unexpected_extra_cols or misordered_cols:
+        raise AssertionError(msg)
 
     return df
 
@@ -86,11 +85,10 @@ def has_no_x(df, values=None, columns=None, **kwargs):
     try:
         assert not df[columns].isin(values).values.any()
     except AssertionError as e:
-        #  missing = df[columns].isin(values)
-        #  locations_info = ",".join(str(x) for x in bad_locations(missing))
-        #  msg.append(locations_info)
-        #  msg.append(format_reason(kwargs))
-        e.args = " ".join(msg)
+        missing = df[columns].isin(values)
+        msg = bad_locations(missing)
+        reason = format_reason(kwargs)
+        e.args = (*msg, reason) if reason else msg
         raise
     return df
 
