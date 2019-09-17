@@ -535,3 +535,9 @@ def test_custom_check():
 
     with pytest.raises(AssertionError):
         dc.CustomCheck(f, 4)(_noop)(df)
+
+
+def test_exception():
+    with pytest.raises(AssertionError, match="message"):
+        df = pd.DataFrame([1, 2, 3], index=["a", "b", "c"], columns=["x"])
+        ck.has_columns(df, columns=["a"], exact_cols=False, exact_order=False, reason="message")

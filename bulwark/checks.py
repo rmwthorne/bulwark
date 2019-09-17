@@ -19,7 +19,7 @@ from bulwark.generic import bad_locations
 warnings.simplefilter('always', DeprecationWarning)
 
 
-def has_columns(df, columns, exact_cols=False, exact_order=False):
+def has_columns(df, columns, exact_cols=False, exact_order=False, reason=""):
     """Asserts that `df` has ``columns``
 
     Args:
@@ -61,6 +61,7 @@ def has_columns(df, columns, exact_cols=False, exact_order=False):
                 msg.append("`df` column order does not match given `columns` order.")
 
     if msg:
+        msg.append(reason)
         raise AssertionError(" ".join(msg))
 
     return df
